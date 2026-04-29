@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EliseAI · Lead Enrichment Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=DM+Sans:wght@400;500&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:      #0F1C3F;
+    --navy-mid:  #1A2E5A;
+    --blue:      #2563EB;
+    --blue-light:#3B82F6;
+    --ice:       #DBEAFE;
+    --white:     #FFFFFF;
+    --off:       #F4F7FF;
+    --muted:     #6B7BA4;
+    --border:    #CBD5F0;
+    --red:       #DC2626;
+    --green:    #16A34A;
+    --yellow:   #D97706;
+  }
+
+  html, body { height: 100%; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    border-bottom: 1px solid rgba(203,213,240,0.15);
+    padding: 18px 40px;
+    display: flex; align-items: center; gap: 14px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    width: 34px; height: 34px;
+    background: var(--blue); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    color: white; font-size: 15px;
+  }
+  .brand { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.3px; }
+  .brand span { color: var(--blue-light); }
+  .pill {
+    margin-left: auto;
+    background: rgba(37,99,235,0.15);
+    border: 1px solid rgba(59,130,246,0.3);
+    color: var(--blue-light);
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    padding: 5px 11px; border-radius: 20px;
+  }
+
+  /* ── LAYOUT ── */
+  .main {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    min-height: calc(100vh - 73px);
+  }
+
+  /* ── LEFT (FORM) ── */
+  .form-panel {
+    background: var(--navy-mid);
+    border-right: 1px solid rgba(203,213,240,0.12);
+    padding: 32px 28px;
+    display: flex; flex-direction: column; gap: 22px;
+    overflow-y: auto;
+  }
+  .panel-h {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 700;
+    margin-bottom: -6px;
+  }
+  .panel-sub {
+    font-size: 13px; color: var(--muted); line-height: 1.5;
+    margin-bottom: 4px;
+  }
+
+  .section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--blue-light);
+    margin-top: 8px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 12px; color: var(--muted); font-weight: 400;
+  }
+  .field input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(203,213,240,0.18);
+    border-radius: 8px;
+    padding: 10px 13px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: white; outline: none;
+    transition: all 0.15s;
+  }
+  .field input::placeholder { color: rgba(107,123,164,0.5); }
+  .field input:focus {
+    border-color: var(--blue-light);
+    background: rgba(37,99,235,0.08);
+  }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* ── KEYS BOX ── */
+  .keys {
+    background: rgba(37,99,235,0.06);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .keys-tip {
+    font-size: 11px; color: var(--muted);
+    line-height: 1.45;
+  }
+  .keys-tip a { color: var(--blue-light); text-decoration: none; }
+  .keys-tip a:hover { text-decoration: underline; }
+
+  /* ── RUN BUTTON ── */
+  .run-btn {
+    margin-top: auto;
+    background: var(--blue);
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px; font-weight: 700;
+    letter-spacing: 0.5px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .run-btn:hover {
+    background: var(--blue-light);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(37,99,235,0.4);
+  }
+  .run-btn:disabled {
+    background: rgba(107,123,164,0.2);
+    cursor: not-allowed;
+    transform: none; box-shadow: none;
+  }
+  .run-btn .arrow { transition: transform 0.2s; }
+  .run-btn:hover .arrow { transform: translateX(3px); }
+
+  /* ── RIGHT (RESULTS) ── */
+  .results {
+    background: var(--off);
+    color: var(--navy);
+    padding: 36px 48px;
+    overflow-y: auto;
+  }
+  .results-h {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px; font-weight: 700; color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .results-sub {
+    color: var(--muted); font-size: 13px; margin-bottom: 28px;
+  }
+
+  .empty-state {
+    border: 2px dashed rgba(107,123,164,0.3);
+    border-radius: 16px;
+    padding: 70px 30px;
+    text-align: center;
+    margin-top: 60px;
+  }
+  .empty-icon {
+    font-size: 48px; margin-bottom: 14px; display: block;
+  }
+  .empty-state h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px; font-weight: 600;
+    color: var(--navy); margin-bottom: 6px;
+  }
+  .empty-state p {
+    color: var(--muted); font-size: 13px; max-width: 400px; margin: 0 auto;
+  }
+
+  /* ── SCORE HERO ── */
+  .score-hero {
+    background: white;
+    border-radius: 16px;
+    padding: 28px 32px;
+    box-shadow: 0 6px 24px rgba(15,28,63,0.08);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+  .score-circle {
+    position: relative;
+    width: 200px; height: 200px;
+  }
+  .score-circle svg { transform: rotate(-90deg); }
+  .score-circle .score-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .score-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 56px; font-weight: 800;
+    color: var(--navy); line-height: 1;
+  }
+  .score-out {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    margin-top: 4px;
+  }
+  .score-tag {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 1px;
+    margin-top: 8px;
+    padding: 4px 12px; border-radius: 20px;
+  }
+  .tag-hot     { background: #FEE2E2; color: #991B1B; }
+  .tag-warm    { background: #FEF3C7; color: #92400E; }
+  .tag-cool    { background: #FEF9C3; color: #854D0E; }
+  .tag-cold    { background: #E0E7FF; color: #3730A3; }
+
+  .lead-info h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 700; color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .lead-info .contact { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+  .lead-meta {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .meta-chip {
+    background: var(--off);
+    border: 1px solid var(--border);
+    color: var(--navy);
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── BREAKDOWN BARS ── */
+  .breakdown {
+    background: white;
+    border-radius: 16px;
+    padding: 26px 32px;
+    box-shadow: 0 6px 24px rgba(15,28,63,0.08);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .breakdown h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--navy); margin-bottom: 18px;
+  }
+  .dim {
+    margin-bottom: 16px;
+  }
+  .dim:last-child { margin-bottom: 0; }
+  .dim-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .dim-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--navy);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .dim-pts {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px; font-weight: 500;
+    color: var(--navy);
+  }
+  .dim-pts span { color: var(--muted); }
+  .dim-bar {
+    height: 8px;
+    background: var(--off);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .dim-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease-out;
+  }
+  .fill-fit       { background: linear-gradient(90deg, #1E5EBF, #3B82F6); }
+  .fill-pain      { background: linear-gradient(90deg, #C0392B, #E74C3C); }
+  .fill-portfolio { background: linear-gradient(90deg, #6D2E46, #B83280); }
+  .fill-location  { background: linear-gradient(90deg, #27AE60, #4ADE80); }
+  .dim-reason {
+    font-size: 11.5px; color: var(--muted); line-height: 1.5;
+  }
+
+  /* ── INSIGHTS GRID ── */
+  .grid-2 {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 22px 26px;
+    box-shadow: 0 6px 24px rgba(15,28,63,0.08);
+    border: 1px solid var(--border);
+  }
+  .card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--navy); margin-bottom: 14px;
+  }
+  .insight-row {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid var(--off);
+    font-size: 13px;
+  }
+  .insight-row:last-child { border-bottom: none; }
+  .insight-row .label { color: var(--muted); }
+  .insight-row .value { color: var(--navy); font-weight: 500; font-family: 'DM Mono', monospace; }
+  .review-flag {
+    margin-top: 14px;
+    padding: 10px 13px;
+    background: #FEF3C7;
+    border-radius: 8px;
+    font-size: 11.5px;
+    color: #92400E;
+    line-height: 1.45;
+  }
+
+  /* ── EMAIL CARD ── */
+  .email-card {
+    background: white;
+    border-radius: 16px;
+    padding: 26px 32px;
+    box-shadow: 0 6px 24px rgba(15,28,63,0.08);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .email-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .email-head h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--navy);
+  }
+  .copy-btn {
+    background: var(--navy);
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { background: var(--blue); }
+  .email-body {
+    background: #FAFBFF;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; line-height: 1.6;
+    color: var(--navy);
+    white-space: pre-wrap;
+  }
+
+  /* ── SPINNER ── */
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── PIPELINE INDICATOR ── */
+  .pipeline {
+    background: white;
+    border-radius: 16px;
+    padding: 24px 32px;
+    box-shadow: 0 6px 24px rgba(15,28,63,0.08);
+    border: 1px solid var(--border);
+  }
+  .pipeline h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--navy); margin-bottom: 18px;
+  }
+  .step {
+    display: flex; align-items: center; gap: 14px;
+    padding: 10px 0;
+  }
+  .step-num {
+    width: 28px; height: 28px;
+    background: var(--off);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+  .step.active .step-num { background: var(--blue); color: white; }
+  .step.done .step-num   { background: var(--green); color: white; }
+  .step-label { font-size: 13px; color: var(--navy); }
+  .step.active .step-label { font-weight: 600; }
+  .step-status {
+    margin-left: auto; font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--muted);
+  }
+  .step.active .step-status { color: var(--blue); }
+  .step.done .step-status   { color: var(--green); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">E</div>
+  <div class="brand">Elise<span>AI</span></div>
+  <div class="pill">Lead Enrichment Tool</div>
+</header>
+
+<div class="main">
+  <!-- LEFT: FORM -->
+  <div class="form-panel">
+    <div>
+      <div class="panel-h">Enrich a lead</div>
+      <div class="panel-sub">Paste in lead details and we'll pull data from Wikipedia, NewsAPI, and the U.S. Census to score and personalize outreach.</div>
+    </div>
+
+    <div class="section-tag">Contact Info</div>
+    <div class="field">
+      <label>Full Name</label>
+      <input id="name" placeholder="e.g. Sarah Johnson">
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input id="email" placeholder="e.g. sarah@greystar.com">
+    </div>
+    <div class="field">
+      <label>Company</label>
+      <input id="company" placeholder="e.g. Greystar Real Estate Partners">
+    </div>
+
+    <div class="section-tag">Property Info</div>
+    <div class="field">
+      <label>Property Address</label>
+      <input id="address" placeholder="e.g. 1200 Brickell Ave">
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>City</label>
+        <input id="city" placeholder="Miami">
+      </div>
+      <div class="field">
+        <label>State</label>
+        <input id="state" placeholder="FL" maxlength="2">
+      </div>
+    </div>
+
+    <div class="section-tag">API Keys</div>
+    <div class="keys">
+      <div class="field">
+        <label>Census API Key</label>
+        <input id="censusKey" type="password" placeholder="paste key">
+      </div>
+      <div class="field">
+        <label>NewsAPI Key</label>
+        <input id="newsKey" type="password" placeholder="paste key">
+      </div>
+      <div class="keys-tip">
+        Free keys: <a href="https://api.census.gov/data/key_signup.html" target="_blank">Census</a> · <a href="https://newsapi.org" target="_blank">NewsAPI</a>. Wikipedia needs no key.
+      </div>
+    </div>
+
+    <button class="run-btn" id="runBtn" onclick="enrichLead()">
+      <span id="btnText">Enrich Lead</span>
+      <span class="arrow">→</span>
+    </button>
+  </div>
+
+  <!-- RIGHT: RESULTS -->
+  <div class="results" id="results">
+    <div class="results-h">Enriched Lead Output</div>
+    <div class="results-sub">Score breakdown, sales insights, and a ready-to-send draft email will appear here.</div>
+
+    <div class="empty-state" id="emptyState">
+      <span class="empty-icon">📋</span>
+      <h3>No lead enriched yet</h3>
+      <p>Fill in the form on the left and click <b>Enrich Lead</b> to generate the score, insights, and a personalized outreach email.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// API CALLS
+// ─────────────────────────────────────────────────────────────
+
+async function fetchWikipedia(company) {
+  const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(company)}`;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return wikiEmpty();
+    const data = await r.json();
+    if (data.type === "disambiguation" || data.missing) return wikiEmpty();
+
+    const extract = data.extract || "";
+    const length = extract.length;
+    const pmKw = ["apartment", "multifamily", "multi-family", "residential",
+                  "property management", "real estate", "units", "leasing",
+                  "renter", "tenant", "housing", "communities"];
+    const hits = pmKw.filter(kw => extract.toLowerCase().includes(kw.toLowerCase()));
+    const unitMatch = extract.match(/([\d,]+)\s*(units?|apartments?|homes?|doors?)/i);
+    const unitCount = unitMatch ? parseInt(unitMatch[1].replace(/,/g, "")) : 0;
+    return { found: true, title: data.title, length, extract: extract.slice(0, 300),
+             pmKeywords: hits, keywordCount: hits.length, unitCount };
+  } catch (e) { return wikiEmpty(); }
+}
+function wikiEmpty() {
+  return { found: false, title: "", length: 0, extract: "",
+           pmKeywords: [], keywordCount: 0, unitCount: 0 };
+}
+
+async function fetchNewsSentiment(company, apiKey) {
+  if (!apiKey) return newsEmpty("No NewsAPI key");
+  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(company)}&language=en&sortBy=publishedAt&pageSize=10&apiKey=${apiKey}`;
+  try {
+    const r = await fetch(url);
+    const data = await r.json();
+    const articles = data.articles || [];
+    if (!articles.length) return newsEmpty("No recent news");
+
+    const text = articles.map(a => `${a.title || ""} ${a.description || ""}`).join(" ");
+    const polarity = simpleSentiment(text);
+
+    let label, urgency;
+    if (polarity < -0.1) {
+      label = "Negative 🔴";
+      urgency = "High — signs of operational pain";
+    } else if (polarity > 0.1) {
+      label = "Positive 🟢";
+      urgency = "Low — company appears to be performing well";
+    } else {
+      label = "Neutral 🟡";
+      urgency = "Moderate — no strong signal";
+    }
+    return {
+      found: true, sentiment: label, polarity: +polarity.toFixed(3),
+      urgency, headlineCount: articles.length,
+      topHeadline: articles[0]?.title?.slice(0, 120) || "N/A",
+      manualReview: "⚠️ Manually verify: check Google/Yelp reviews for leasing complaints",
+    };
+  } catch (e) { return newsEmpty(e.message); }
+}
+
+// Lightweight in-browser sentiment (since we can't use TextBlob in JS)
+function simpleSentiment(text) {
+  const positive = ["good","great","excellent","wins","award","growth","expand",
+                    "success","strong","best","leading","record","achieve","launch",
+                    "innovative","top","quality","positive"];
+  const negative = ["lawsuit","sued","complaint","bad","poor","fails","fail",
+                    "decline","loses","loss","crisis","scandal","issue","problem",
+                    "fraud","violation","fine","penalty","negative","slow","delayed"];
+  const lower = text.toLowerCase();
+  let pos = 0, neg = 0;
+  positive.forEach(w => { const m = lower.match(new RegExp(`\\b${w}`, "g")); pos += m ? m.length : 0; });
+  negative.forEach(w => { const m = lower.match(new RegExp(`\\b${w}`, "g")); neg += m ? m.length : 0; });
+  if (pos + neg === 0) return 0;
+  return (pos - neg) / (pos + neg);
+}
+
+function newsEmpty(reason) {
+  return { found: false, sentiment: "Unknown", polarity: 0,
+           urgency: "Unknown — manual review needed",
+           headlineCount: 0, topHeadline: "N/A",
+           manualReview: `⚠️ No news data (${reason}) — check Google/Yelp manually` };
+}
+
+async function fetchCensus(city, state, apiKey) {
+  const STATE_FIPS = {AL:"01",AK:"02",AZ:"04",AR:"05",CA:"06",CO:"08",CT:"09",
+    DE:"10",FL:"12",GA:"13",HI:"15",ID:"16",IL:"17",IN:"18",IA:"19",KS:"20",
+    KY:"21",LA:"22",ME:"23",MD:"24",MA:"25",MI:"26",MN:"27",MS:"28",MO:"29",
+    MT:"30",NE:"31",NV:"32",NH:"33",NJ:"34",NM:"35",NY:"36",NC:"37",ND:"38",
+    OH:"39",OK:"40",OR:"41",PA:"42",RI:"44",SC:"45",SD:"46",TN:"47",TX:"48",
+    UT:"49",VT:"50",VA:"51",WA:"53",WV:"54",WI:"55",WY:"56",DC:"11"};
+  const stateFips = STATE_FIPS[state.toUpperCase()] || "36";
+  const vars = "B01003_001E,B25003_003E,B25003_001E,B25064_001E";
+  const keyPart = apiKey ? `&key=${apiKey}` : "";
+  const url = `https://api.census.gov/data/2022/acs/acs5?get=NAME,${vars}&for=place:*&in=state:${stateFips}${keyPart}`;
+  try {
+    const r = await fetch(url);
+    const rows = await r.json();
+    const headers = rows[0];
+    let match = null;
+    const cityLower = city.toLowerCase();
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i][0].toLowerCase().includes(cityLower)) {
+        match = Object.fromEntries(headers.map((h, j) => [h, rows[i][j]]));
+        break;
+      }
+    }
+    if (!match && rows.length > 1) {
+      match = Object.fromEntries(headers.map((h, j) => [h, rows[1][j]]));
+    }
+    const pop = parseInt(match.B01003_001E);
+    const renterUnits = parseInt(match.B25003_003E) || 0;
+    const totalUnits = parseInt(match.B25003_001E) || 1;
+    const rent = parseInt(match.B25064_001E);
+    const renterPct = +(renterUnits / totalUnits * 100).toFixed(1);
+    return {
+      found: true,
+      population: pop > 0 ? pop : "N/A",
+      renterPct,
+      medianRent: rent > 0 ? rent : "N/A",
+    };
+  } catch (e) {
+    return { found: false, population: "N/A", renterPct: 0, medianRent: "N/A" };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCORING
+// ─────────────────────────────────────────────────────────────
+
+function scoreFit(company, wiki) {
+  const name = company.toLowerCase();
+  const tier1 = ["property management", "property mgmt", "apartments", "apartment",
+                 "residential", "realty", "housing", "communities", "living",
+                 "multifamily", "multi-family", "real estate partners"];
+  const tier2 = ["real estate", "investment", "equity", "trust", "capital",
+                 "holdings", "group", "partners", "fund", "asset"];
+
+  for (const kw of tier1) if (name.includes(kw))
+    return { points: 30, reason: `Tier 1 Fit — clear property management company ('${kw}' in name)` };
+
+  for (const kw of tier2) if (name.includes(kw)) {
+    if (wiki.keywordCount >= 3)
+      return { points: 30, reason: `Tier 1 Fit — '${kw}' in name + Wikipedia confirms multifamily (${wiki.keywordCount} PM keywords)` };
+    return { points: 20, reason: `Tier 2 Fit — '${kw}' in name — Wikipedia did not strongly confirm multifamily focus` };
+  }
+
+  if (wiki.keywordCount >= 3)
+    return { points: 20, reason: `Tier 2 Fit — no name keywords but Wikipedia confirms PM focus (${wiki.keywordCount} keywords)` };
+  if (wiki.keywordCount >= 1)
+    return { points: 12, reason: `Tier 3 Fit — weak Wikipedia signals only (${wiki.keywordCount} PM keyword)` };
+  return { points: 8, reason: "Tier 3 Fit — no property management signals detected — manual verification needed" };
+}
+
+function scorePain(news) {
+  if (!news.found)
+    return { points: 10, reason: "No recent news — default Pain score applied. Manual review needed" };
+
+  const count = news.headlineCount;
+  const bonus = count >= 7 ? 2 : count >= 4 ? 1 : 0;
+  let base, reason;
+  if (news.sentiment.includes("Negative")) {
+    base = 25;
+    reason = `Negative news sentiment (${news.polarity}) — operational pain → HIGH urgency`;
+  } else if (news.sentiment.includes("Positive")) {
+    base = 3;
+    reason = `Positive news sentiment (${news.polarity}) — performing well → low urgency`;
+  } else {
+    base = 13;
+    reason = `Neutral news sentiment (${news.polarity}) — no strong pain signal`;
+  }
+  return { points: Math.min(base + bonus, 30), reason: `${reason} | ${count} headlines analyzed` };
+}
+
+function scorePortfolio(wiki, news) {
+  if (!wiki.found) return { points: 2, reason: "No Wikipedia article — likely small/local operator" };
+
+  const len = wiki.length, units = wiki.unitCount, kw = wiki.keywordCount;
+  const newsCount = news.headlineCount;
+  const reasons = [];
+  let base;
+  if (len > 3000) { base = 14; reasons.push(`Large Wikipedia article (${len.toLocaleString()} chars) — national operator`); }
+  else if (len > 1000) { base = 8; reasons.push(`Mid-size Wikipedia article (${len.toLocaleString()} chars) — regional operator`); }
+  else { base = 3; reasons.push(`Short Wikipedia article (${len.toLocaleString()} chars) — smaller operator`); }
+
+  let bonus = 0;
+  if (units > 10000) { bonus += 3; reasons.push(`Massive portfolio: ${units.toLocaleString()} units mentioned`); }
+  else if (units > 1000) { bonus += 2; reasons.push(`Significant portfolio: ${units.toLocaleString()} units mentioned`); }
+  else if (units > 0) { bonus += 1; reasons.push(`Unit count found: ${units.toLocaleString()} units`); }
+  if (newsCount >= 7) { bonus += 2; reasons.push(`High news visibility (${newsCount} articles)`); }
+  if (kw >= 5) { bonus += 1; reasons.push(`Strong PM presence in Wikipedia (${kw} keywords)`); }
+  return { points: Math.min(base + bonus, 20), reason: reasons.join(" | ") };
+}
+
+function scoreLocation(census, city) {
+  const TOP = ["new york","los angeles","chicago","houston","phoenix","philadelphia",
+               "dallas","san antonio","san diego","austin","seattle","denver","boston",
+               "atlanta","miami","minneapolis","portland","nashville","charlotte",
+               "raleigh","san francisco","washington","las vegas","orlando","tampa","detroit"];
+  const isTop = TOP.some(m => city.toLowerCase().includes(m));
+
+  if (!census.found) {
+    const base = isTop ? 14 : 5;
+    return { points: base, reason: `Census unavailable — ${isTop ? "major metro fallback" : "small market assumed"}` };
+  }
+
+  const pop = census.population;
+  const renterPct = census.renterPct;
+  const reasons = [];
+  let base;
+  if (typeof pop === "number") {
+    if (pop >= 1_000_000) { base = 16; reasons.push(`Major metro (${pop.toLocaleString()} pop)`); }
+    else if (pop >= 500_000) { base = 13; reasons.push(`Large city (${pop.toLocaleString()} pop)`); }
+    else if (pop >= 100_000) { base = 8; reasons.push(`Mid-size city (${pop.toLocaleString()} pop)`); }
+    else { base = 3; reasons.push(`Smaller market (${pop.toLocaleString()} pop)`); }
+  } else { base = isTop ? 14 : 5; reasons.push("Population data unavailable"); }
+
+  let bonus = 0;
+  if (renterPct >= 60) { bonus = 3; reasons.push(`High renter density (${renterPct}%) — strong multifamily market`); }
+  else if (renterPct >= 45) { bonus = 2; reasons.push(`Moderate renter density (${renterPct}%)`); }
+  else if (renterPct >= 30) { bonus = 1; reasons.push(`Lower renter density (${renterPct}%)`); }
+
+  return { points: Math.min(base + bonus, 20), reason: reasons.join(" | ") };
+}
+
+function applyFitCap(fitPts, pain, portfolio, location) {
+  const raw = pain + portfolio + location;
+  let cap;
+  if (fitPts >= 30) cap = 70;
+  else if (fitPts >= 20) cap = 45;
+  else cap = 20;
+  const capped = Math.min(raw, cap);
+  if (raw > 0) {
+    const r = capped / raw;
+    return [
+      Math.min(Math.round(pain * r), 30),
+      Math.min(Math.round(portfolio * r), 20),
+      Math.min(Math.round(location * r), 20),
+    ];
+  }
+  return [0, 0, 0];
+}
+
+function scoreLabel(score) {
+  if (score >= 75) return { text: "🔥 HOT", cls: "tag-hot" };
+  if (score >= 55) return { text: "✅ WARM", cls: "tag-warm" };
+  if (score >= 35) return { text: "⚠️ COOL", cls: "tag-cool" };
+  return { text: "❄️ COLD", cls: "tag-cold" };
+}
+
+// ─────────────────────────────────────────────────────────────
+// EMAIL DRAFT
+// ─────────────────────────────────────────────────────────────
+
+function draftEmail(lead, wiki, news, census) {
+  const name = lead.name.split(" ")[0] || "there";
+  const company = lead.company || "your company";
+  const city = lead.city || "your city";
+  const state = lead.state || "";
+  const sentiment = news.sentiment || "";
+  const units = wiki.unitCount || 0;
+  const renterPct = census.renterPct || 0;
+  const rent = census.medianRent;
+
+  let hook;
+  if (sentiment.includes("Negative")) {
+    hook = `I came across some recent coverage about ${company} and wanted to reach out. When leasing teams are under pressure, response time is usually the first thing that slips — and the hardest to fix manually.`;
+  } else if (units > 5000) {
+    hook = `Managing a portfolio the scale of ${company}'s means your leasing team is fielding hundreds of inquiries across multiple properties. At that volume, every hour of delayed response is a potential lost lease.`;
+  } else if (renterPct >= 50) {
+    hook = `${city} has one of the stronger renter markets in ${state} — with ${renterPct}% of residents renting, the competition for quality tenants is real, and response speed often wins the lease.`;
+  } else if (renterPct > 0 && renterPct < 50) {
+    hook = `In a market like ${city} where most residents are owners (${(100 - renterPct).toFixed(1)}% ownership rate), every renter inquiry is more valuable — and harder to come by. Missing one because of slow response time is a real cost.`;
+  } else if (typeof rent === "number" && rent >= 1500) {
+    hook = `In a market like ${city} where median rent runs $${rent.toLocaleString()}/month, prospective tenants have high expectations — and they'll go with whoever responds first.`;
+  } else {
+    hook = `Managing properties in ${city} means every inbound inquiry counts. The difference between filling a unit and losing it to a competitor often comes down to who responds first.`;
+  }
+
+  return `Subject: Helping ${company} Lease Faster in ${city}
+
+Hi ${name},
+
+${hook}
+
+That's exactly why I'm reaching out. EliseAI is an AI-powered leasing assistant that helps property managers respond to every inbound lead instantly — 24/7 — so you never miss a prospective tenant.
+
+Our platform typically helps teams:
+• Reduce time-to-lease by 30–50%
+• Cut leasing staff workload significantly
+• Maintain consistent, compliant communication at scale
+
+Given ${company}'s presence in ${city}, I'd love to show you how similar operators are using EliseAI to stay ahead.
+
+Would you have 20 minutes this week for a quick demo?
+
+Best,
+[Your Name]
+EliseAI Sales Team`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// MAIN ORCHESTRATION + UI
+// ─────────────────────────────────────────────────────────────
+
+async function enrichLead() {
+  const lead = {
+    name:    document.getElementById("name").value.trim(),
+    email:   document.getElementById("email").value.trim(),
+    company: document.getElementById("company").value.trim(),
+    address: document.getElementById("address").value.trim(),
+    city:    document.getElementById("city").value.trim(),
+    state:   document.getElementById("state").value.trim(),
+  };
+  const censusKey = document.getElementById("censusKey").value.trim();
+  const newsKey   = document.getElementById("newsKey").value.trim();
+
+  if (!lead.company || !lead.city || !lead.state) {
+    alert("Please fill in at least Company, City, and State.");
+    return;
+  }
+
+  const btn = document.getElementById("runBtn");
+  const btnText = document.getElementById("btnText");
+  btn.disabled = true;
+  btnText.innerHTML = '<span class="spinner"></span> Enriching...';
+
+  // Show pipeline
+  document.getElementById("results").innerHTML = `
+    <div class="results-h">Enriching lead…</div>
+    <div class="results-sub">Calling 3 public APIs and computing scores.</div>
+    <div class="pipeline">
+      <h3>Pipeline</h3>
+      <div class="step" id="step1">
+        <div class="step-num">1</div>
+        <div class="step-label">Wikipedia — company profile + portfolio</div>
+        <div class="step-status">queued</div>
+      </div>
+      <div class="step" id="step2">
+        <div class="step-num">2</div>
+        <div class="step-label">NewsAPI — sentiment for pain score</div>
+        <div class="step-status">queued</div>
+      </div>
+      <div class="step" id="step3">
+        <div class="step-num">3</div>
+        <div class="step-label">U.S. Census — population & renter %</div>
+        <div class="step-status">queued</div>
+      </div>
+      <div class="step" id="step4">
+        <div class="step-num">4</div>
+        <div class="step-label">Score: Fit + Pain + Portfolio + Location</div>
+        <div class="step-status">queued</div>
+      </div>
+    </div>
+  `;
+
+  await setStep("step1", "active", "fetching...");
+  const wiki = await fetchWikipedia(lead.company);
+  await setStep("step1", "done", "✓");
+
+  await setStep("step2", "active", "analyzing...");
+  const news = await fetchNewsSentiment(lead.company, newsKey);
+  await setStep("step2", "done", "✓");
+
+  await setStep("step3", "active", "fetching...");
+  const census = await fetchCensus(lead.city, lead.state, censusKey);
+  await setStep("step3", "done", "✓");
+
+  await setStep("step4", "active", "computing...");
+  const fit = scoreFit(lead.company, wiki);
+  const pain = scorePain(news);
+  const port = scorePortfolio(wiki, news);
+  const loc = scoreLocation(census, lead.city);
+  const [painF, portF, locF] = applyFitCap(fit.points, pain.points, port.points, loc.points);
+  const total = Math.min(fit.points + painF + portF + locF, 100);
+  const tag = scoreLabel(total);
+  const email = draftEmail(lead, wiki, news, census);
+  await setStep("step4", "done", "✓");
+
+  await sleep(300);
+  renderResults({ lead, wiki, news, census, fit, pain, port, loc, painF, portF, locF, total, tag, email });
+
+  btn.disabled = false;
+  btnText.innerHTML = "Enrich another lead";
+}
+
+function setStep(id, state, statusText) {
+  return new Promise(r => {
+    const el = document.getElementById(id);
+    if (!el) return r();
+    el.classList.remove("active", "done");
+    el.classList.add(state);
+    el.querySelector(".step-status").textContent = statusText;
+    setTimeout(r, 250);
+  });
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function renderResults(d) {
+  const { lead, wiki, news, census, fit, pain, port, loc, painF, portF, locF, total, tag, email } = d;
+
+  // Score circle ring fill
+  const circ = 2 * Math.PI * 90;
+  const dashOffset = circ * (1 - total / 100);
+  const ringColor = total >= 75 ? "#DC2626" : total >= 55 ? "#D97706" : total >= 35 ? "#CA8A04" : "#4F46E5";
+
+  document.getElementById("results").innerHTML = `
+    <div class="results-h">Enriched Lead Output</div>
+    <div class="results-sub">Generated ${new Date().toLocaleString()} · 3 public APIs · 4-dimension scoring</div>
+
+    <!-- SCORE HERO -->
+    <div class="score-hero">
+      <div class="score-circle">
+        <svg width="200" height="200">
+          <circle cx="100" cy="100" r="90" stroke="#E0E7FF" stroke-width="14" fill="none"/>
+          <circle cx="100" cy="100" r="90" stroke="${ringColor}" stroke-width="14" fill="none"
+                  stroke-dasharray="${circ}" stroke-dashoffset="${dashOffset}"
+                  stroke-linecap="round"/>
+        </svg>
+        <div class="score-center">
+          <div class="score-num">${total}</div>
+          <div class="score-out">OUT OF 100</div>
+          <div class="score-tag ${tag.cls}">${tag.text}</div>
+        </div>
+      </div>
+      <div class="lead-info">
+        <h2>${lead.company || "—"}</h2>
+        <div class="contact">${lead.name || "—"} · ${lead.email || "—"}</div>
+        <div class="lead-meta">
+          <span class="meta-chip">${lead.city || "—"}, ${lead.state || "—"}</span>
+          <span class="meta-chip">${lead.address || "no address"}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCORE BREAKDOWN -->
+    <div class="breakdown">
+      <h3>Score Breakdown</h3>
+      ${dimRow("FIT", fit.points, 30, "fill-fit", fit.reason)}
+      ${dimRow("PAIN", painF, 30, "fill-pain", pain.reason)}
+      ${dimRow("PORTFOLIO SIZE", portF, 20, "fill-portfolio", port.reason)}
+      ${dimRow("LOCATION", locF, 20, "fill-location", loc.reason)}
+    </div>
+
+    <!-- INSIGHTS GRID -->
+    <div class="grid-2">
+      <div class="card">
+        <h3>Sales Insights</h3>
+        <div class="insight-row">
+          <span class="label">Population</span>
+          <span class="value">${typeof census.population === "number" ? census.population.toLocaleString() : "N/A"}</span>
+        </div>
+        <div class="insight-row">
+          <span class="label">Renter %</span>
+          <span class="value">${census.renterPct || 0}%</span>
+        </div>
+        <div class="insight-row">
+          <span class="label">Median Rent</span>
+          <span class="value">${typeof census.medianRent === "number" ? "$" + census.medianRent.toLocaleString() + "/mo" : "N/A"}</span>
+        </div>
+        <div class="insight-row">
+          <span class="label">Wiki Article</span>
+          <span class="value">${wiki.length.toLocaleString()} chars</span>
+        </div>
+        <div class="insight-row">
+          <span class="label">Units Mentioned</span>
+          <span class="value">${wiki.unitCount.toLocaleString()}</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>News & Pain Signal</h3>
+        <div class="insight-row">
+          <span class="label">Sentiment</span>
+          <span class="value">${news.sentiment}</span>
+        </div>
+        <div class="insight-row">
+          <span class="label">Polarity</span>
+          <span class="value">${news.polarity}</span>
+        </div>
+        <div class="insight-row">
+          <span class="label">Headlines</span>
+          <span class="value">${news.headlineCount}</span>
+        </div>
+        <div class="insight-row">
+          <span class="label">Urgency</span>
+          <span class="value">${news.urgency.split(" — ")[0]}</span>
+        </div>
+        <div class="insight-row" style="display:block;">
+          <span class="label">Top Headline</span>
+          <div class="value" style="margin-top:4px; font-family: 'DM Sans', sans-serif; font-weight: 400; font-size: 12px; color: var(--navy);">${news.topHeadline}</div>
+        </div>
+        <div class="review-flag">${news.manualReview}</div>
+      </div>
+    </div>
+
+    <!-- DRAFT EMAIL -->
+    <div class="email-card">
+      <div class="email-head">
+        <h3>Draft Outreach Email</h3>
+        <button class="copy-btn" onclick="copyEmail()">Copy</button>
+      </div>
+      <div class="email-body" id="emailBody">${escapeHtml(email)}</div>
+    </div>
+  `;
+}
+
+function dimRow(name, points, max, fillCls, reason) {
+  const pct = (points / max) * 100;
+  return `
+    <div class="dim">
+      <div class="dim-head">
+        <div class="dim-name">${name}</div>
+        <div class="dim-pts">${points}<span> / ${max}</span></div>
+      </div>
+      <div class="dim-bar"><div class="dim-fill ${fillCls}" style="width: ${pct}%;"></div></div>
+      <div class="dim-reason">${reason}</div>
+    </div>
+  `;
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function copyEmail() {
+  const text = document.getElementById("emailBody").innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector(".copy-btn");
+    btn.textContent = "Copied!";
+    setTimeout(() => btn.textContent = "Copy", 1500);
+  });
+}
+</script>
+</body>
+</html>
